@@ -19,7 +19,8 @@ def changeVideoTitle(viewCount, id, c):
         client_secrets_file, scopes)
     c.flow = flow
 
-    auth_url, _ = flow.authorization_url(prompt='consent', redirect_uri="http://localhost:8080/")
+    # Elimina el parámetro 'redirect_uri' en esta línea
+    auth_url, _ = flow.authorization_url(prompt='consent')
     print("Go to this URL and authorize the application:", auth_url)
 
     code = input("Enter the authorization code: ")
