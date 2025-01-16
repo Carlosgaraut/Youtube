@@ -19,7 +19,7 @@ def main():
     # Bucle de 20,000 ejecuciones
     while c.num < 20000:  # Corrigiendo la coma
         id = "7lqYwKU3WM4"
-        API_KEY = "AIzaSyA5VygQ4sTuR0UwQG-ninp-6lkND2Dmrlw"
+        API_KEY = "AIzaSyCq9oTJTYQl5cvUCSDgv7kOm74WGIJ7HB0"
         
         # Obtiene el número de vistas del video
         viewCount = int(getViews(id, API_KEY))
