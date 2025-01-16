@@ -24,15 +24,14 @@ def changeVideoTitle(viewCount, id, c):
     c.flow = flow
 
     # Use run_local_server() instead of run_console()
-    # Elimina el redirect_uri aquí ya que ya está en el archivo client_secret.json
     auth_url, _ = flow.authorization_url(
-        prompt='consent'  # No hace falta especificar el redirect_uri aquí
+        prompt='consent',
+        access_type='offline',  # Asegúrate de agregar esto para obtener el refresh token
+        redirect_uri="http://localhost:8888/"  # Asegúrate de que el puerto coincida aquí
     )
-
+    
     print("Go to this URL and authorize the application:", auth_url)
     code = input("Enter the authorization code: ")
-
-    # Fetch the authorization token using the code received from the user
     credentials = flow.fetch_token(authorization_response=code)
     c.credentials = credentials
 
@@ -40,19 +39,21 @@ def changeVideoTitle(viewCount, id, c):
         api_service_name, api_version, credentials=credentials)
     c.youtube = youtube
 
-    # Update the video title
     request = youtube.videos().update(
         part="snippet",  # ,status
         body={
             "id": id,
             "snippet": {
                 "categoryId": 22,
+                # "defaultLanguage": "en",
                 "description": desc,
+                # "tags": [
+                #   "tom scott","tomscott","api","coding","application programming interface","data api"
+                # ],
                 "title": title
             },
         }
     )
     response = request.execute()
     print(response)
-
 
