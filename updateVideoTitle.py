@@ -1,42 +1,41 @@
-import json
 import os
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
 
 def changeVideoTitle(viewCount, id, c):
-    title = "Este vídeo tiene " + str(viewCount) + " Visitas wouuu"
+    title = "Este vídeo tiene " + str(viewCount) + " Visitas"
     desc = "¿Estás impresionado?"
 
     scopes = ["https://www.googleapis.com/auth/youtube.readonly", "https://www.googleapis.com/auth/youtube.force-ssl"]
 
-    # Disable OAuthlib's HTTPS verification when running locally.
-    # *DO NOT* leave this option enabled in production.
+    # Desactivar la verificación HTTPS solo para entorno local
+    # *NO DEJES ESTA OPCIÓN ACTIVADA EN PRODUCCIÓN*
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
     api_service_name = "youtube"
     api_version = "v3"
     client_secrets_file = "client_secret.json"
 
-    # Get credentials and create an API client
+    # Obtener credenciales y crear un cliente de la API
     flow = c.flow if c.flow else google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
         client_secrets_file, scopes)
     c.flow = flow
 
-    # Usar el flujo de consola para obtener las credenciales
     try:
-        credentials = c.credentials if c.credentials else flow.run_console()  # Usamos run_console() en la consola
+        # Intentamos usar el flujo local sin abrir el navegador
+        credentials = c.credentials if c.credentials else flow.run_local_server(port=8888, open_browser=False)
         c.credentials = credentials
     except Exception as e:
-        print("Error al intentar autorizar desde la consola: ", e)
+        print(f"Error al intentar autorizar desde la consola: {e}")
         return
 
-    # Crear cliente API de YouTube
+    # Crear el cliente de YouTube con las credenciales
     youtube = c.youtube if c.youtube else googleapiclient.discovery.build(
         api_service_name, api_version, credentials=credentials)
     c.youtube = youtube
 
-    # Actualizar el título del vídeo
+    # Realizar la actualización del título del video
     request = youtube.videos().update(
         part="snippet",  # ,status
         body={
@@ -48,6 +47,26 @@ def changeVideoTitle(viewCount, id, c):
             },
         }
     )
-    response = request.execute()
-    print(response)  # Muestra la respuesta de la API
 
+    response = request.execute()
+
+    # Mostrar respuesta (puedes cambiar esto según lo que necesites)
+    print("Video actualizado con éxito:", response)
+
+
+# Aquí colocas el código para llamar a la función
+def main():
+    # Suponiendo que ya tienes el `viewCount` y `id` del video
+    viewCount = 137  # Cambia este valor según tu caso
+    video_id = "7lqYwKU3WM4"  # El ID de tu video en YouTube
+
+    # Creamos el objeto 'c' donde guardamos las credenciales y el cliente
+    c = type('', (), {})()  # Creamos un objeto vacío para 'c'
+    c.credentials = None
+    c.flow = None
+    c.youtube = None
+
+    changeVideoTitle(viewCount, video_id, c)
+
+if __name__ == "__main__":
+    main()
