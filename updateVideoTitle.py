@@ -24,10 +24,9 @@ def changeVideoTitle(viewCount, id, c):
     c.flow = flow
 
     # Use run_local_server() instead of run_console()
-    # Aquí es donde se pasa el redirect_uri explícitamente
+    # Elimina el redirect_uri aquí ya que ya está en el archivo client_secret.json
     auth_url, _ = flow.authorization_url(
-        prompt='consent', 
-        redirect_uri="http://localhost:8080/"
+        prompt='consent'  # No hace falta especificar el redirect_uri aquí
     )
 
     print("Go to this URL and authorize the application:", auth_url)
@@ -55,4 +54,5 @@ def changeVideoTitle(viewCount, id, c):
     )
     response = request.execute()
     print(response)
+
 
