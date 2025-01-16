@@ -23,7 +23,7 @@ def changeVideoTitle(viewCount, id, c):
     c.flow = flow
 
     try:
-        # Utilizamos el flujo de consola para autorizar sin necesidad de navegador gráfico
+        # Aquí es donde corregimos la autorización usando run_console()
         credentials = c.credentials if c.credentials else flow.run_console()
         c.credentials = credentials
     except Exception as e:
