@@ -31,7 +31,8 @@ def changeVideoTitle(viewCount, id, c):
     except webbrowser.Error:
         # If the local server fails, use the console flow
         print("Error al iniciar el servidor local. Intentando el flujo de consola.")
-        credentials = c.credentials if c.credentials else flow.run_console()  # Usar run_console() en consola
+        # Usar la autorización en consola explícita
+        credentials = c.credentials if c.credentials else flow.run_console()  # Ahora usamos run_console explícitamente
         c.credentials = credentials
 
     youtube = c.youtube if c.youtube else googleapiclient.discovery.build(
