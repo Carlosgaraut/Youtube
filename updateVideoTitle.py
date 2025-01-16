@@ -3,7 +3,6 @@ import os
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
-import webbrowser  # Importar el módulo webbrowser para manejar errores de navegador
 
 def changeVideoTitle(viewCount, id, c):
     title = "Este vídeo tiene " + str(viewCount) + " Visitas"
@@ -24,21 +23,20 @@ def changeVideoTitle(viewCount, id, c):
         client_secrets_file, scopes)
     c.flow = flow
 
-    # Try using run_local_server first (use port 8888 or another port)
+    # Usar el flujo de consola para obtener las credenciales
     try:
-        credentials = c.credentials if c.credentials else flow.run_local_server(port=8888, open_browser=True)
+        credentials = c.credentials if c.credentials else flow.run_console()  # Usamos run_console() en la consola
         c.credentials = credentials
-    except webbrowser.Error:
-        # If the local server fails, use the console flow
-        print("Error al iniciar el servidor local. Intentando el flujo de consola.")
-        # Usar la autorización en consola explícita
-        credentials = c.credentials if c.credentials else flow.run_console()  # Ahora usamos run_console explícitamente
-        c.credentials = credentials
+    except Exception as e:
+        print("Error al intentar autorizar desde la consola: ", e)
+        return
 
+    # Crear cliente API de YouTube
     youtube = c.youtube if c.youtube else googleapiclient.discovery.build(
         api_service_name, api_version, credentials=credentials)
     c.youtube = youtube
 
+    # Actualizar el título del vídeo
     request = youtube.videos().update(
         part="snippet",  # ,status
         body={
@@ -51,4 +49,5 @@ def changeVideoTitle(viewCount, id, c):
         }
     )
     response = request.execute()
-    # print(response)
+    print(response)  # Muestra la respuesta de la API
+
