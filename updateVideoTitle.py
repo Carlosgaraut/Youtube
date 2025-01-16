@@ -3,6 +3,7 @@ import os
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
+import webbrowser  # Importar el módulo webbrowser para manejar errores de navegador
 
 def changeVideoTitle(viewCount, id, c):
     title = "Este vídeo tiene " + str(viewCount) + " Visitas"
