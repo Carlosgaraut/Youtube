@@ -1,9 +1,6 @@
-import json
-import os
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
-import googleapiclient.errors
-
+import os
 
 def changeVideoTitle(viewCount, id, c):
     title = "Este vídeo tiene " + str(viewCount) + " Visitas"
@@ -25,7 +22,17 @@ def changeVideoTitle(viewCount, id, c):
     c.flow = flow
 
     # Use run_local_server() instead of run_console()
-    credentials = c.credentials if c.credentials else flow.run_local_server(port=8080)
+    if c.credentials:
+        credentials = c.credentials
+    else:
+        # Print the URL for manual authorization
+        auth_url, _ = flow.authorization_url(prompt='consent')
+        print("Go to the following URL to authorize the application:")
+        print(auth_url)
+        authorization_response = input("Enter the authorization code: ")
+        credentials = flow.fetch_token(
+            'https://oauth2.googleapis.com/token',
+            authorization_response=authorization_response)
     c.credentials = credentials
 
     youtube = c.youtube if c.youtube else googleapiclient.discovery.build(
@@ -38,11 +45,7 @@ def changeVideoTitle(viewCount, id, c):
             "id": id,
             "snippet": {
                 "categoryId": 22,
-                # "defaultLanguage": "en",
                 "description": desc,
-                # "tags": [
-                #   "tom scott","tomscott","api","coding","application programming interface","data api"
-                # ],
                 "title": title
             },
         }
