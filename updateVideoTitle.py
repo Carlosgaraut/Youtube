@@ -1,57 +1,52 @@
-import json
+from google_auth_oauthlib.flow import InstalledAppFlow
 import os
-import google_auth_oauthlib.flow
-import googleapiclient.discovery
-import googleapiclient.errors
+import pickle
 
-def changeVideoTitle(viewCount, id, c):
-    title = "Este vídeo tiene " + str(viewCount) + " Visitas"
-    desc = "¿Estás impresionado?"
+# Ruta del archivo de credenciales (client_secret.json)
+CLIENT_SECRET_FILE = 'client_secret.json'
 
-    scopes = ["https://www.googleapis.com/auth/youtube.readonly", "https://www.googleapis.com/auth/youtube.force-ssl"]
+# Alcance de la autorización
+SCOPES = ['https://www.googleapis.com/auth/youtube.force-ssl']
 
-    # Disable OAuthlib's HTTPS verification when running locally.
-    # *DO NOT* leave this option enabled in production.
-    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+def changeVideoTitle(viewCount, video_id, youtube):
+    # Inicia el flujo de autenticación
+    flow = InstalledAppFlow.from_client_secrets_file(
+        CLIENT_SECRET_FILE, SCOPES)
+    
+    # Si no tienes un token guardado, pide la autorización
+    credentials = None
+    if os.path.exists('token.pickle'):
+        with open('token.pickle', 'rb') as token:
+            credentials = pickle.load(token)
 
-    api_service_name = "youtube"
-    api_version = "v3"
-    client_secrets_file = "client_secret.json"  # Aquí asegúrate de que esté el archivo correcto
+    if not credentials or not credentials.valid:
+        if credentials and credentials.expired and credentials.refresh_token:
+            credentials.refresh(Request())
+        else:
+            auth_url, _ = flow.authorization_url(prompt='consent')  # Eliminamos el `redirect_uri`
+            print('Go to this URL and authorize the application: {}'.format(auth_url))
+            authorization_response = input('Enter the authorization code: ')
+            credentials = flow.fetch_token(
+                'https://oauth2.googleapis.com/token',
+                authorization_response=authorization_response)
 
-    # Get credentials and create an API client
-    flow = c.flow if c.flow else google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-        client_secrets_file, scopes)
-    c.flow = flow
+        # Guarda el token para futuras ejecuciones
+        with open('token.pickle', 'wb') as token:
+            pickle.dump(credentials, token)
 
-    # Agregar el parámetro 'redirect_uri' al flujo
-    redirect_uri = "http://localhost:8080"  # El URI que has configurado en la consola de Google Cloud
-    auth_url, _ = flow.authorization_url(prompt='consent', redirect_uri=redirect_uri)
-    print("Go to this URL and authorize the application:", auth_url)
+    # Usamos las credenciales para crear el servicio de la API de YouTube
+    youtube = build('youtube', 'v3', credentials=credentials)
+    
+    # Ahora puedes utilizar la API de YouTube, como cambiar el título de un video
+    youtube.videos().update(
+        part="snippet",
+        body=dict(
+            id=video_id,
+            snippet=dict(
+                title=f"Nuevo título {viewCount} views"
+            )
+        )
+    ).execute()
 
-    # Obtén el código de autorización
-    code = input("Enter the authorization code: ")
-    credentials = flow.fetch_token(authorization_response=code, redirect_uri=redirect_uri)
-    c.credentials = credentials
-
-    youtube = c.youtube if c.youtube else googleapiclient.discovery.build(
-        api_service_name, api_version, credentials=credentials)
-    c.youtube = youtube
-
-    request = youtube.videos().update(
-        part="snippet",  # ,status
-        body={
-            "id": id,
-            "snippet": {
-                "categoryId": 22,
-                # "defaultLanguage": "en",
-                "description": desc,
-                # "tags": [
-                #   "tom scott","tomscott","api","coding","application programming interface","data api"
-                # ],
-                "title": title
-            },
-        }
-    )
-    response = request.execute()
-    print(response)
+    print(f"Video {video_id} actualizado con éxito")
 
