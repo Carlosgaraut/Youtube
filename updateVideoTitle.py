@@ -10,26 +10,28 @@ def changeVideoTitle(viewCount, id, c):
     scopes = ["https://www.googleapis.com/auth/youtube.readonly", "https://www.googleapis.com/auth/youtube.force-ssl"]
 
     # Disable OAuthlib's HTTPS verification when running locally.
-    # *DO NOT* leave this option enabled in production.
-    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Asegúrate de estar trabajando en local
 
     api_service_name = "youtube"
     api_version = "v3"
-    client_secrets_file = "client_secret.json"
+    client_secrets_file = "client_secret.json"  # El archivo JSON debe estar correctamente configurado
 
     # Get credentials and create an API client
     flow = c.flow if c.flow else google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
         client_secrets_file, scopes)
     c.flow = flow
 
-    # Aquí no pasamos el redirect_uri explícitamente
+    # Solicitar la URL de autorización
     auth_url, _ = flow.authorization_url(
         prompt='consent',
         access_type='offline'  # Asegúrate de agregar esto para obtener el refresh token
     )
 
+    # Mostrar la URL y pedir el código de autorización
     print("Go to this URL and authorize the application:", auth_url)
     code = input("Enter the authorization code: ")
+
+    # Obtener el token
     credentials = flow.fetch_token(authorization_response=code)
     c.credentials = credentials
 
@@ -37,17 +39,14 @@ def changeVideoTitle(viewCount, id, c):
         api_service_name, api_version, credentials=credentials)
     c.youtube = youtube
 
+    # Realizar la actualización del título del video
     request = youtube.videos().update(
         part="snippet",  # ,status
         body={
             "id": id,
             "snippet": {
                 "categoryId": 22,
-                # "defaultLanguage": "en",
                 "description": desc,
-                # "tags": [
-                #   "tom scott","tomscott","api","coding","application programming interface","data api"
-                # ],
                 "title": title
             },
         }
