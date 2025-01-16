@@ -1,6 +1,8 @@
+import json
 import os
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
+import googleapiclient.errors
 
 def changeVideoTitle(viewCount, id, c):
     title = "Este vídeo tiene " + str(viewCount) + " Visitas"
@@ -8,22 +10,30 @@ def changeVideoTitle(viewCount, id, c):
 
     scopes = ["https://www.googleapis.com/auth/youtube.readonly", "https://www.googleapis.com/auth/youtube.force-ssl"]
 
-    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Sólo para pruebas locales
+    # Disable OAuthlib's HTTPS verification when running locally.
+    # *DO NOT* leave this option enabled in production.
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
     api_service_name = "youtube"
     api_version = "v3"
     client_secrets_file = "client_secret.json"
 
-    # Obtener credenciales y crear un cliente de la API
+    # Get credentials and create an API client
     flow = c.flow if c.flow else google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
         client_secrets_file, scopes)
     c.flow = flow
 
-    # Elimina el parámetro 'redirect_uri' en esta línea
-    auth_url, _ = flow.authorization_url(prompt='consent')
-    print("Go to this URL and authorize the application:", auth_url)
+    # Use run_local_server() instead of run_console()
+    # Aquí es donde se pasa el redirect_uri explícitamente
+    auth_url, _ = flow.authorization_url(
+        prompt='consent', 
+        redirect_uri="http://localhost:8080/"
+    )
 
+    print("Go to this URL and authorize the application:", auth_url)
     code = input("Enter the authorization code: ")
+
+    # Fetch the authorization token using the code received from the user
     credentials = flow.fetch_token(authorization_response=code)
     c.credentials = credentials
 
@@ -31,8 +41,9 @@ def changeVideoTitle(viewCount, id, c):
         api_service_name, api_version, credentials=credentials)
     c.youtube = youtube
 
+    # Update the video title
     request = youtube.videos().update(
-        part="snippet",
+        part="snippet",  # ,status
         body={
             "id": id,
             "snippet": {
@@ -44,3 +55,4 @@ def changeVideoTitle(viewCount, id, c):
     )
     response = request.execute()
     print(response)
+
