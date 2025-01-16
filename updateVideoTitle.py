@@ -23,11 +23,11 @@ def changeVideoTitle(viewCount, id, c):
     c.flow = flow
 
     try:
-        # Usamos run_console() para la autorización en consola
-        credentials = c.credentials if c.credentials else flow.run_console()
+        # Usamos run_local_server() para la autorización en servidor local
+        credentials = c.credentials if c.credentials else flow.run_local_server(port=8080)
         c.credentials = credentials
     except Exception as e:
-        print(f"Error al intentar autorizar desde la consola: {e}")
+        print(f"Error al intentar autorizar desde el servidor local: {e}")
         return
 
     # Crear el cliente de YouTube con las credenciales
