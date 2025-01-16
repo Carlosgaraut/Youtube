@@ -1,60 +1,54 @@
-import os
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
+import os
 
-def authenticate_with_oauth2(client_secrets_file, scopes):
+def changeVideoTitle(viewCount, id, c):
+    title = "Este vídeo tiene " + str(viewCount) + " Visitas"
+    desc = "¿Estás impresionado?"
+
+    scopes = ["https://www.googleapis.com/auth/youtube.readonly", "https://www.googleapis.com/auth/youtube.force-ssl"]
+
     # Disable OAuthlib's HTTPS verification when running locally.
+    # *DO NOT* leave this option enabled in production.
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
-    # Configura el flujo de OAuth 2.0
-    flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
+    api_service_name = "youtube"
+    api_version = "v3"
+    client_secrets_file = "client_secret.json"
+
+    # Get credentials and create an API client
+    flow = c.flow if c.flow else google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
         client_secrets_file, scopes)
+    c.flow = flow
 
-    # Solicita el código de autorización
-    auth_url, _ = flow.authorization_url(prompt='consent')
-    print(f"Go to the following URL to authorize the application: {auth_url}")
-    
-    # Ingresar el código de autorización manualmente
-    authorization_response = input("Enter the authorization code: ")
-    credentials = flow.fetch_token(
-        'https://oauth2.googleapis.com/token', 
-        authorization_response=authorization_response)
-    
-    return credentials
+    # Use run_local_server() instead of run_console()
+    if c.credentials:
+        credentials = c.credentials
+    else:
+        # Print the URL for manual authorization
+        auth_url, _ = flow.authorization_url(prompt='consent')
+        print("Go to the following URL to authorize the application:")
+        print(auth_url)
+        authorization_response = input("Enter the authorization code: ")
+        credentials = flow.fetch_token(
+            'https://oauth2.googleapis.com/token',
+            authorization_response=authorization_response)
+    c.credentials = credentials
 
-def update_video_title(credentials, video_id, new_title, new_description):
-    youtube = googleapiclient.discovery.build(
-        "youtube", "v3", credentials=credentials)
+    youtube = c.youtube if c.youtube else googleapiclient.discovery.build(
+        api_service_name, api_version, credentials=credentials)
+    c.youtube = youtube
 
     request = youtube.videos().update(
-        part="snippet",
+        part="snippet",  # ,status
         body={
-            "id": video_id,
+            "id": id,
             "snippet": {
-                "title": new_title,
-                "description": new_description,
-                "categoryId": "22"
-            }
+                "categoryId": 22,
+                "description": desc,
+                "title": title
+            },
         }
     )
-
     response = request.execute()
-    return response
-
-def main():
-    client_secrets_file = 'client_secret.json'  # Ruta al archivo de credenciales
-    scopes = ["https://www.googleapis.com/auth/youtube.force-ssl"]
-
-    # Autenticación
-    credentials = authenticate_with_oauth2(client_secrets_file, scopes)
-
-    # Cambiar título y descripción del video
-    video_id = "7lqYwKU3WM4"  # El ID del video que quieres modificar
-    new_title = "Este vídeo tiene nuevas visitas"
-    new_description = "¡Mira el vídeo para más detalles!"
-    
-    response = update_video_title(credentials, video_id, new_title, new_description)
-    print(response)
-
-if __name__ == '__main__':
-    main()
+    # print(response)
