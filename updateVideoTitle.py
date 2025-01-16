@@ -22,12 +22,12 @@ def changeVideoTitle(viewCount, id, c):
         client_secrets_file, scopes)
     c.flow = flow
 
-    # Aquí ya no pasamos el 'redirect_uri' explícitamente
+    # Aquí no pasamos el redirect_uri explícitamente
     auth_url, _ = flow.authorization_url(
         prompt='consent',
         access_type='offline'  # Asegúrate de agregar esto para obtener el refresh token
     )
-    
+
     print("Go to this URL and authorize the application:", auth_url)
     code = input("Enter the authorization code: ")
     credentials = flow.fetch_token(authorization_response=code)
