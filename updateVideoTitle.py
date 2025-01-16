@@ -23,11 +23,11 @@ def changeVideoTitle(viewCount, id, c):
     c.flow = flow
 
     try:
-        # Usamos run_console() para la autorización en consola
-        credentials = c.credentials if c.credentials else flow.run_console()
+        # Intentamos usar el flujo local sin abrir el navegador
+        credentials = c.credentials if c.credentials else flow.run_local_server(port=8888, open_browser=False)
         c.credentials = credentials
     except Exception as e:
-        print(f"Error al intentar autorizar desde el servidor local: {e}")
+        print(f"Error al intentar autorizar desde la consola: {e}")
         return
 
     # Crear el cliente de YouTube con las credenciales
@@ -66,17 +66,6 @@ def main():
     c.flow = None
     c.youtube = None
 
-    # Modificamos el flujo para permitir la autorización manual
-    flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-        "client_secret.json", scopes=["https://www.googleapis.com/auth/youtube.readonly", "https://www.googleapis.com/auth/youtube.force-ssl"]
-    )
-    
-    # Este método pedirá autorización manual desde la consola
-    credentials = flow.run_console()
-
-    c.credentials = credentials
-
-    # Llamamos a la función para cambiar el título del video
     changeVideoTitle(viewCount, video_id, c)
 
 if __name__ == "__main__":
