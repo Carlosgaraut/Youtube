@@ -5,7 +5,7 @@ import googleapiclient.discovery
 import googleapiclient.errors
 
 def changeVideoTitle(viewCount, id, c):
-    title = "Este vídeo tiene " + str(viewCount) + " Visitas"
+    title = "Este vídeo tiene " + str(viewCount) + " Visitas wouuu"
     desc = "¿Estás impresionado?"
 
     scopes = ["https://www.googleapis.com/auth/youtube.readonly", "https://www.googleapis.com/auth/youtube.force-ssl"]
