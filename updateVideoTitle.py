@@ -22,13 +22,16 @@ def changeVideoTitle(viewCount, id, c):
         client_secrets_file, scopes)
     c.flow = flow
 
-    # Use run_local_server() instead of run_console() and set port 8080
-    credentials = c.credentials if c.credentials else flow.run_local_server(port=8080)
+    # Disable opening the browser automatically
+    credentials = c.credentials if c.credentials else flow.run_local_server(port=8080, open_browser=False)
     c.credentials = credentials
 
     youtube = c.youtube if c.youtube else googleapiclient.discovery.build(
         api_service_name, api_version, credentials=credentials)
     c.youtube = youtube
+
+    # Once the flow is done, you can manually copy the URL printed in the logs and open it in your browser
+    print(f"Open this URL in your browser and authorize the app: {flow.authorization_url()[0]}")
 
     # Update the video title
     request = youtube.videos().update(
