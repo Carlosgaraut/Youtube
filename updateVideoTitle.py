@@ -66,6 +66,22 @@ def main():
     c.flow = None
     c.youtube = None
 
+    # Modificamos el flujo para permitir la autorización manual
+    flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
+        "client_secret.json", scopes=["https://www.googleapis.com/auth/youtube.readonly", "https://www.googleapis.com/auth/youtube.force-ssl"]
+    )
+    authorization_url, _ = flow.authorization_url(access_type='offline', include_granted_scopes='true')
+
+    print("Por favor, autoriza la aplicación abriendo la siguiente URL en tu navegador local:")
+    print(authorization_url)
+
+    # Aquí el script espera a que el usuario ingrese el código de autorización
+    auth_code = input("Introduce el código de autorización: ")
+
+    # Cambia el código por las credenciales
+    credentials = flow.fetch_token(authorization_response=f"http://localhost:8080/?code={auth_code}")
+    c.credentials = credentials
+
     changeVideoTitle(viewCount, video_id, c)
 
 if __name__ == "__main__":
