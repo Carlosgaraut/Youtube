@@ -23,14 +23,14 @@ def changeVideoTitle(viewCount, id, c):
         client_secrets_file, scopes)
     c.flow = flow
 
+    # Try using run_local_server first (use port 8888 or another port)
     try:
-        # Cambiar a puerto 8888
         credentials = c.credentials if c.credentials else flow.run_local_server(port=8888, open_browser=True)
         c.credentials = credentials
-    except Exception as e:
-        print(f"Error al iniciar el servidor local: {e}")
-        print("Intentando flujo en consola como último recurso...")
-        credentials = flow.run_console()  # Usar flujo de consola en caso de fallo
+    except webbrowser.Error:
+        # If the local server fails, use the console flow
+        print("Error al iniciar el servidor local. Intentando el flujo de consola.")
+        credentials = c.credentials if c.credentials else flow.run_console()
         c.credentials = credentials
 
     youtube = c.youtube if c.youtube else googleapiclient.discovery.build(
@@ -49,4 +49,4 @@ def changeVideoTitle(viewCount, id, c):
         }
     )
     response = request.execute()
-    print(response)
+    # print(response)
