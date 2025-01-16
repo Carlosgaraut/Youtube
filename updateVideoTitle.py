@@ -1,4 +1,3 @@
-import json
 import os
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
@@ -23,11 +22,10 @@ def changeVideoTitle(viewCount, id, c):
         client_secrets_file, scopes)
     c.flow = flow
 
-    # Use run_local_server() instead of run_console()
+    # Aquí ya no pasamos el 'redirect_uri' explícitamente
     auth_url, _ = flow.authorization_url(
         prompt='consent',
-        access_type='offline',  # Asegúrate de agregar esto para obtener el refresh token
-        redirect_uri="http://localhost:8888/"  # Asegúrate de que el puerto coincida aquí
+        access_type='offline'  # Asegúrate de agregar esto para obtener el refresh token
     )
     
     print("Go to this URL and authorize the application:", auth_url)
@@ -56,4 +54,3 @@ def changeVideoTitle(viewCount, id, c):
     )
     response = request.execute()
     print(response)
-
