@@ -1,3 +1,4 @@
+import json
 import os
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
@@ -22,18 +23,20 @@ def changeVideoTitle(viewCount, id, c):
         client_secrets_file, scopes)
     c.flow = flow
 
-    # Disable opening the browser automatically
-    credentials = c.credentials if c.credentials else flow.run_local_server(port=8080, open_browser=False)
-    c.credentials = credentials
+    try:
+        # Cambiar a puerto 8888
+        credentials = c.credentials if c.credentials else flow.run_local_server(port=8888, open_browser=True)
+        c.credentials = credentials
+    except Exception as e:
+        print(f"Error al iniciar el servidor local: {e}")
+        print("Intentando flujo en consola como último recurso...")
+        credentials = flow.run_console()  # Usar flujo de consola en caso de fallo
+        c.credentials = credentials
 
     youtube = c.youtube if c.youtube else googleapiclient.discovery.build(
         api_service_name, api_version, credentials=credentials)
     c.youtube = youtube
 
-    # Once the flow is done, you can manually copy the URL printed in the logs and open it in your browser
-    print(f"Open this URL in your browser and authorize the app: {flow.authorization_url()[0]}")
-
-    # Update the video title
     request = youtube.videos().update(
         part="snippet",  # ,status
         body={
@@ -46,5 +49,4 @@ def changeVideoTitle(viewCount, id, c):
         }
     )
     response = request.execute()
-    # Uncomment to view the API response
-    # print(response)
+    print(response)
