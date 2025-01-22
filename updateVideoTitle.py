@@ -23,7 +23,7 @@ def changeVideoTitle(viewCount, id, c):
     c.flow = flow
 
     try:
-        # Cambiar para usar el flujo en consola
+        # Intentamos usar el flujo de autorización desde la consola
         credentials = c.credentials if c.credentials else flow.run_console()
         c.credentials = credentials
     except Exception as e:
@@ -70,3 +70,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
