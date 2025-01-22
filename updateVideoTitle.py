@@ -35,15 +35,8 @@ def changeVideoTitle(viewCount, id, c):
     c.flow = flow
 
     try:
-        # Obtener el enlace de autorización
-        auth_url, _ = flow.authorization_url(access_type='offline')
-        print(f"Por favor visita esta URL para autorizar la aplicación:\n{auth_url}")
-        
-        # Pide al usuario que pegue el código de autorización aquí
-        auth_code = input("Introduce el código de autorización: ")
-
-        # Intercambiar el código por un token de acceso
-        credentials = flow.fetch_token(authorization_response=f'http://localhost:8888/?code={auth_code}')
+        # Iniciar el servidor local automáticamente
+        credentials = flow.run_local_server(port=5555)  # Esto abrirá automáticamente el navegador y obtendrá el token de acceso
         c.credentials = credentials
 
     except Exception as e:
