@@ -2,15 +2,6 @@ import os
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
-import time
-
-class creds:
-    def __init__(self):
-        self.credentials = False
-        self.flow = False
-        self.youtube = False
-        self.viewCount = 0
-        self.num = 0
 
 def changeVideoTitle(viewCount, id, c):
     title = "Este vídeo tiene " + str(viewCount) + " Visitas"
@@ -24,7 +15,7 @@ def changeVideoTitle(viewCount, id, c):
 
     api_service_name = "youtube"
     api_version = "v3"
-    client_secrets_file = "client_secret.json"  # Asegúrate de tener este archivo en tu directorio
+    client_secrets_file = "client_secret.json"
 
     # Obtener credenciales y crear un cliente de la API
     flow = c.flow if c.flow else google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
@@ -32,8 +23,8 @@ def changeVideoTitle(viewCount, id, c):
     c.flow = flow
 
     try:
-        # Intentamos usar el flujo local sin abrir el navegador
-        credentials = c.credentials if c.credentials else flow.run_local_server(port=8888)
+        # Cambiar para usar el flujo en consola
+        credentials = c.credentials if c.credentials else flow.run_console()
         c.credentials = credentials
     except Exception as e:
         print(f"Error al intentar autorizar desde la consola: {e}")
@@ -63,53 +54,19 @@ def changeVideoTitle(viewCount, id, c):
     print("Video actualizado con éxito:", response)
 
 
-def getViews(VID_ID, API_KEY):
-    import urllib.request
-    import json
-
-    url = 'https://www.googleapis.com/youtube/v3/videos?part=statistics&id=' + VID_ID + '&key=' + API_KEY
-    req = urllib.request.Request(url)
-    resp = urllib.request.urlopen(req)
-    respData = resp.read()
-    res = json.loads(respData.decode('utf-8'))
-    statistics = res["items"][0]["statistics"]
-    viewCount = statistics["viewCount"]
-    return viewCount
-
-
+# Aquí colocas el código para llamar a la función
 def main():
-    c = creds()
-    timeout = 720  # Tiempo por defecto en segundos (12 minutos)
-    
-    # Bucle de 20,000 ejecuciones
-    while c.num < 20000:
-        id = "7lqYwKU3WM4"  # ID del video
-        API_KEY = "AIzaSyA5VygQ4sTuR0UwQG-ninp-6lkND2Dmrlw"  # Reemplaza esto con tu API Key de YouTube
+    # Suponiendo que ya tienes el `viewCount` y `id` del video
+    viewCount = 137  # Cambia este valor según tu caso
+    video_id = "7lqYwKU3WM4"  # El ID de tu video en YouTube
 
-        # Obtiene el número de vistas del video
-        viewCount = int(getViews(id, API_KEY))
+    # Creamos el objeto 'c' donde guardamos las credenciales y el cliente
+    c = type('', (), {})()  # Creamos un objeto vacío para 'c'
+    c.credentials = None
+    c.flow = None
+    c.youtube = None
 
-        # Verifica si el número de vistas ha cambiado
-        if viewCount != c.viewCount:
-            changeVideoTitle(viewCount, id, c)
-            print("Changing viewCount...")
-            print("Go to https://www.youtube.com/watch?v=" + str(id) + " and check out the name.")
-            timeout = 480  # Si cambia el contador de vistas, el tiempo de espera será de 8 minutos
-        else:
-            print("The view count is the same as it was so we are not changing")
-            timeout = 240  # Si no cambia, el tiempo de espera será de 4 minutos
-
-        c.viewCount = viewCount  # Actualiza el contador de vistas
-
-        # Espera durante el tiempo especificado (timeout)
-        for i in range(timeout):
-            time.sleep(1)
-            if (timeout - i) % 60 == 0:  # Imprime los minutos restantes
-                print(f"Time remaining: {timeout-i} seconds")
-        
-        print(f"Completed running time number {c.num}.")
-        c.num += 1  # Incrementa el contador de ejecuciones
-
+    changeVideoTitle(viewCount, video_id, c)
 
 if __name__ == "__main__":
     main()
