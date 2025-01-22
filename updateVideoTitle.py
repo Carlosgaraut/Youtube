@@ -7,12 +7,11 @@ import time
 # Clase para manejar las credenciales y el flujo de autorización
 class creds:
     def __init__(self):
-        self.credentials = False
-        self.flow = False
-        self.youtube = False
+        self.credentials = None
+        self.flow = None
+        self.youtube = None
         self.viewCount = 0
         self.num = 0
-
 
 def changeVideoTitle(viewCount, id, c):
     # Título y descripción del video
@@ -39,7 +38,9 @@ def changeVideoTitle(viewCount, id, c):
         auth_url, _ = flow.authorization_url(access_type='offline')
         print(f"Por favor visita esta URL para autorizar la aplicación:\n{auth_url}")
 
-        # Pide al usuario que pegue el código de autorización aquí
+        # Enlace de autorización ya generado para que puedas copiar y pegar en el navegador
+
+        # Una vez autorizado, Google redirige a la URL proporcionada. Puedes copiar y pegar el código que se muestra.
         auth_code = input("Introduce el código de autorización que obtuviste: ")
 
         # Intercambiar el código por un token de acceso
@@ -72,7 +73,6 @@ def changeVideoTitle(viewCount, id, c):
 
     print("Video actualizado con éxito:", response)
 
-
 def main():
     # Ejemplo: id de video y viewCount
     viewCount = 137
@@ -88,4 +88,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
