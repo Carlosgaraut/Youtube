@@ -2,15 +2,28 @@ import os
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
-import webbrowser
+import time
+
+# Clase para manejar las credenciales y el flujo de autorización
+class creds:
+    def __init__(self):
+        self.credentials = False
+        self.flow = False
+        self.youtube = False
+        self.viewCount = 0
+        self.num = 0
+
 
 def changeVideoTitle(viewCount, id, c):
+    # Título y descripción del video
     title = "Este vídeo tiene " + str(viewCount) + " Visitas"
     desc = "¿Estás impresionado?"
 
+    # Alcance necesario para la API de YouTube
     scopes = ["https://www.googleapis.com/auth/youtube.readonly", "https://www.googleapis.com/auth/youtube.force-ssl"]
 
-    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Desactivar la verificación HTTPS solo para pruebas
+    # Desactiva la verificación HTTPS (solo para pruebas locales)
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  
 
     api_service_name = "youtube"
     api_version = "v3"
@@ -58,6 +71,7 @@ def changeVideoTitle(viewCount, id, c):
     response = request.execute()
 
     print("Video actualizado con éxito:", response)
+
 
 def main():
     # Ejemplo: id de video y viewCount
