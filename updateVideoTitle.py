@@ -15,16 +15,19 @@ def changeVideoTitle(viewCount, id, c):
 
     api_service_name = "youtube"
     api_version = "v3"
-    client_secrets_file = "client_secret.json"
+    client_secrets_file = "client_secret.json"  # Ruta de tu archivo de secretos
 
     # Obtener credenciales y crear un cliente de la API
     flow = c.flow if c.flow else google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
         client_secrets_file, scopes)
     c.flow = flow
 
+    # Asegúrate de usar la IP pública de tu instancia en Google Cloud
+    flow.redirect_uri = 'http://104.154.249.111:8080/'  # Cambia por la IP pública de tu VM
+
     try:
-        # Usar un flujo que nos entregue un enlace para autorizar manualmente
-        credentials = flow.run_local_server(port=8080, open_browser=False)
+        # Intentamos usar el flujo local sin abrir el navegador
+        credentials = c.credentials if c.credentials else flow.run_local_server(port=8080)
         c.credentials = credentials
     except Exception as e:
         print(f"Error al intentar autorizar desde la consola: {e}")
