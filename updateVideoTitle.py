@@ -24,7 +24,7 @@ def changeVideoTitle(viewCount, id, c):
 
     try:
         # Usar un flujo que nos entregue un enlace para autorizar manualmente
-        credentials = c.credentials if c.credentials else flow.run_local_server(port=8888, open_browser=False)
+        credentials = flow.run_local_server(port=8080, open_browser=False)
         c.credentials = credentials
     except Exception as e:
         print(f"Error al intentar autorizar desde la consola: {e}")
