@@ -10,29 +10,39 @@ def changeVideoTitle(viewCount, id, c):
 
     scopes = ["https://www.googleapis.com/auth/youtube.readonly", "https://www.googleapis.com/auth/youtube.force-ssl"]
 
-    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Desactivar la verificación HTTPS solo para pruebas
 
     api_service_name = "youtube"
     api_version = "v3"
-    client_secrets_file = "client_secret.json"
+    client_secrets_file = "client_secret.json"  # Asegúrate de que este archivo esté en tu directorio
 
+    # Crear el flujo de autorización
     flow = c.flow if c.flow else google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
         client_secrets_file, scopes)
     c.flow = flow
 
     try:
-        # Intentamos usar el flujo local para obtener el código de autorización
-        credentials = c.credentials if c.credentials else flow.run_local_server(port=8080)
+        # Obtener el enlace de autorización
+        auth_url, _ = flow.authorization_url(access_type='offline')
+        print(f"Por favor visita esta URL para autorizar la aplicación:\n{auth_url}")
+        
+        # Pide al usuario que pegue el código de autorización aquí
+        auth_code = input("Introduce el código de autorización: ")
+
+        # Intercambiar el código por un token de acceso
+        credentials = flow.fetch_token(authorization_response=f'http://localhost:8080/?code={auth_code}')
         c.credentials = credentials
+
     except Exception as e:
         print(f"Error al intentar autorizar desde la consola: {e}")
         return
 
+    # Crear cliente de YouTube
     youtube = c.youtube if c.youtube else googleapiclient.discovery.build(
         api_service_name, api_version, credentials=credentials)
     c.youtube = youtube
 
-    # Realizar la actualización del título del video
+    # Actualizar título del video
     request = youtube.videos().update(
         part="snippet",
         body={
@@ -49,21 +59,18 @@ def changeVideoTitle(viewCount, id, c):
 
     print("Video actualizado con éxito:", response)
 
-
 def main():
-    # ID del video y el viewCount de ejemplo
+    # Ejemplo: id de video y viewCount
     viewCount = 137
     video_id = "7lqYwKU3WM4"
     
-    # Creamos el objeto 'c' donde guardamos las credenciales y el cliente
-    c = type('', (), {})()
+    # Objeto 'c' donde almacenamos las credenciales y el cliente
+    c = type('', (), {})()  # Crear objeto vacío
     c.credentials = None
     c.flow = None
     c.youtube = None
 
-    # Cambiar el título del video
     changeVideoTitle(viewCount, video_id, c)
-
 
 if __name__ == "__main__":
     main()
