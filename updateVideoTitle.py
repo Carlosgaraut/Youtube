@@ -30,7 +30,7 @@ def changeVideoTitle(viewCount, id, c):
         auth_code = input("Introduce el código de autorización: ")
 
         # Intercambiar el código por un token de acceso
-        credentials = flow.fetch_token(authorization_response=f'http://localhost:8888/?code={auth_code}')
+        credentials = flow.fetch_token(authorization_response=f'http://localhost:5000/?code={auth_code}')
         c.credentials = credentials
 
     except Exception as e:
