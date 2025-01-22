@@ -84,7 +84,7 @@ def main():
     # Bucle de 20,000 ejecuciones
     while c.num < 20000:
         id = "7lqYwKU3WM4"  # ID del video
-        API_KEY = "TU_API_KEY_AQUI"  # Reemplaza esto con tu API Key de YouTube
+        API_KEY = "AIzaSyA5VygQ4sTuR0UwQG-ninp-6lkND2Dmrlw"  # Reemplaza esto con tu API Key de YouTube
 
         # Obtiene el número de vistas del video
         viewCount = int(getViews(id, API_KEY))
