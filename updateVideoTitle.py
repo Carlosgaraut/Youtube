@@ -2,6 +2,7 @@ import os
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
+import webbrowser
 
 def changeVideoTitle(viewCount, id, c):
     title = "Este vídeo tiene " + str(viewCount) + " Visitas"
@@ -20,6 +21,7 @@ def changeVideoTitle(viewCount, id, c):
     c.flow = flow
 
     try:
+        # Intentamos usar el flujo local para obtener el código de autorización
         credentials = c.credentials if c.credentials else flow.run_local_server(port=8080)
         c.credentials = credentials
     except Exception as e:
@@ -30,6 +32,7 @@ def changeVideoTitle(viewCount, id, c):
         api_service_name, api_version, credentials=credentials)
     c.youtube = youtube
 
+    # Realizar la actualización del título del video
     request = youtube.videos().update(
         part="snippet",
         body={
@@ -46,16 +49,21 @@ def changeVideoTitle(viewCount, id, c):
 
     print("Video actualizado con éxito:", response)
 
+
 def main():
+    # ID del video y el viewCount de ejemplo
     viewCount = 137
     video_id = "7lqYwKU3WM4"
     
+    # Creamos el objeto 'c' donde guardamos las credenciales y el cliente
     c = type('', (), {})()
     c.credentials = None
     c.flow = None
     c.youtube = None
 
+    # Cambiar el título del video
     changeVideoTitle(viewCount, video_id, c)
+
 
 if __name__ == "__main__":
     main()
